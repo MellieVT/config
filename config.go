@@ -12,9 +12,8 @@
 package config
 
 import (
-	"reflect"
-
 	"github.com/pkg/errors"
+	"reflect"
 )
 
 // Parse takes a struct pointer and parses out env tags in order to populate it from the environment.
@@ -25,7 +24,7 @@ func Parse(i interface{}) error {
 	}
 
 	// grab all fields from the given struct along with their required env tags
-	f := fields(v.Type())
+	f := fields(v.Elem().Type())
 
 	// next, grab all environment tags so we can fully parse the tree.
 	// we deliberately do multiple passes here, as this is a startup cost that people are opting into.
@@ -33,5 +32,5 @@ func Parse(i interface{}) error {
 	e := getenv(env(f))
 
 	// next, we go through and set values for every field; validation comes later.
-	return e.populate(v, f, false)
+	return e.populate(v.Elem(), f, false)
 }

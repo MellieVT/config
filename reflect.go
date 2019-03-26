@@ -50,11 +50,18 @@ func fields(v reflect.Type) []*field {
 			continue
 		}
 
+		var in []string
+		if inTag := f.Tag.Get("in"); inTag != "" {
+			in = strings.Split(inTag, ",")
+		} else {
+			in = make([]string, 0)
+		}
+
 		r[i] = &field{
 			f:        f,
 			env:      f.Tag.Get("env"),
 			required: f.Tag.Get("required"),
-			in:       strings.Split(f.Tag.Get("in"), ","),
+			in:       in,
 		}
 	}
 
@@ -114,6 +121,9 @@ func set(value reflect.Value, str, key string) error {
 		}
 
 		value.SetUint(i)
+
+	default:
+		return errors.Errorf("config: unknown type given for env variable '%s'", key)
 	}
 
 	return nil

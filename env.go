@@ -66,7 +66,7 @@ func (e envMap) required(req string) bool {
 
 func (e envMap) populate(v reflect.Value, f []*field, force bool) error {
 	for i, field := range f {
-		value := v.Index(i)
+		value := v.Field(i)
 
 		r := e.required(field.required) || force
 
@@ -93,7 +93,7 @@ func (e envMap) populate(v reflect.Value, f []*field, force bool) error {
 			continue
 		}
 
-		if notIn(field.in, val) {
+		if !allowed(field.in, val) {
 			return errors.Errorf("config: env variable '%s' must be one of (%s); %s given", field.env, strings.Join(field.in, ", "), val)
 		}
 
@@ -107,16 +107,16 @@ func (e envMap) populate(v reflect.Value, f []*field, force bool) error {
 }
 
 // simple loop over a slice of strings to check if a given search is there.
-func notIn(allowed []string, search string) bool {
+func allowed(allowed []string, search string) bool {
 	if len(allowed) == 0 {
-		return false
+		return true
 	}
 
 	for _, a := range allowed {
 		if search == a {
-			return false
+			return true
 		}
 	}
 
-	return true
+	return false
 }
